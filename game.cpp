@@ -19,21 +19,28 @@ void DrawGameOver(float x, float y, int fontSize) {
 
 void ResetGame(Vector2 &carPosition, float &roadSpeed) {
     carPosition = {INITIAL_CAR_X, INITIAL_CAR_Y};
-    roadSpeed = INITIAL_ROAD_SPEED;
+    roadSpeed = 0.0f;
 }
 
 int main() {
+    SetAudioStreamBufferSizeDefault(1024);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Cargame");
+    InitAudioDevice();
     SetTargetFPS(TARGET_FPS);
 
     Texture2D carTexture = LoadTexture("assets/car.png");
     Texture2D roadTexture = LoadTexture("assets/road.png");
+    Sound  crashsfx = LoadSound("assets/crash.wav");
+    Music carsfx = LoadMusicStream("assets/car.wav");
+    SetSoundVolume(crashsfx, 0.3f);
     SetTextureWrap(roadTexture, TEXTURE_WRAP_REPEAT);
 
     Vector2 carPosition = {INITIAL_CAR_X, INITIAL_CAR_Y};
     float roadSpeed = INITIAL_ROAD_SPEED;
     bool isGameOver = false;
     bool controlsSeized = false;
+    bool hascrashsfxplayed = false;
+    carsfx.looping = true;
 
     Rectangle roadSource = {0.0f, 0.0f, 64.0f, 64.0f};
     Rectangle roadDest = {0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT};
@@ -44,8 +51,19 @@ int main() {
     float gameOverX = (SCREEN_WIDTH / 2) - (textWidth / 2);
     float gameOverY = (SCREEN_HEIGHT / 2) - (GAME_OVER_FONT_SIZE / 2);
 
+    PlayMusicStream(carsfx);
+
     while (!WindowShouldClose()) {
         roadSource.y -= roadSpeed;
+        UpdateMusicStream(carsfx);
+
+        if (IsKeyDown(KEY_W)) {
+            roadSpeed = INITIAL_ROAD_SPEED;
+            ResumeMusicStream(carsfx);
+        } else {
+            roadSpeed = 0.0f;
+            PauseMusicStream(carsfx);
+        }
 
         if (!controlsSeized) {
             if (IsKeyDown(KEY_D)) carPosition.x += CAR_MOVE_SPEED;
@@ -56,12 +74,19 @@ int main() {
             isGameOver = false;
             controlsSeized = false;
             ResetGame(carPosition, roadSpeed);
+            hascrashsfxplayed = false;
+            ResumeMusicStream(carsfx);
         }
 
         Rectangle playerBox = {carPosition.x, carPosition.y, CAR_SIZE, CAR_SIZE};
         if (CheckCollisionRecs(playerBox, leftRoadWall) || CheckCollisionRecs(playerBox, rightRoadWall)) {
             isGameOver = true;
             controlsSeized = true;
+            PauseMusicStream(carsfx);
+            if (!hascrashsfxplayed) {
+                PlaySound(crashsfx);
+                hascrashsfxplayed = true;
+            }
         }
 
         ClearBackground(WHITE);
@@ -84,6 +109,5 @@ int main() {
     UnloadTexture(carTexture);
     UnloadTexture(roadTexture);
     CloseWindow();
-
     return 0;
 }
