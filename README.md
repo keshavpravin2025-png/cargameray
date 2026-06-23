@@ -21,7 +21,8 @@ An infinite scrolling 2D arcade driving game built from scratch using **C++** an
 ---
 
 ## 📸 Media / Screenshots
-*(Tip: You can drag and drop screenshots of your running game window directly into this section while editing on GitHub!)*
+<img width="803" height="618" alt="image" src="https://github.com/user-attachments/assets/a8d72955-3c4b-483a-a537-d61b2c0de325" />
+<img width="801" height="628" alt="image" src="https://github.com/user-attachments/assets/45a3e627-2697-4fb6-abec-0d76da293caa" />
 
 ---
 
